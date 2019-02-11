@@ -35,6 +35,26 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Lumen\Application as LumenApplication;
+use Mollie\Api\Endpoints\ChargebackEndpoint;
+use Mollie\Api\Endpoints\CustomerEndpoint;
+use Mollie\Api\Endpoints\CustomerPaymentsEndpoint;
+use Mollie\Api\Endpoints\InvoiceEndpoint;
+use Mollie\Api\Endpoints\MandateEndpoint;
+use Mollie\Api\Endpoints\MethodEndpoint;
+use Mollie\Api\Endpoints\OrderEndpoint;
+use Mollie\Api\Endpoints\OrderLineEndpoint;
+use Mollie\Api\Endpoints\OrderRefundEndpoint;
+use Mollie\Api\Endpoints\OrganizationEndpoint;
+use Mollie\Api\Endpoints\PaymentCaptureEndpoint;
+use Mollie\Api\Endpoints\PaymentChargebackEndpoint;
+use Mollie\Api\Endpoints\PaymentEndpoint;
+use Mollie\Api\Endpoints\PaymentRefundEndpoint;
+use Mollie\Api\Endpoints\PermissionEndpoint;
+use Mollie\Api\Endpoints\ProfileEndpoint;
+use Mollie\Api\Endpoints\RefundEndpoint;
+use Mollie\Api\Endpoints\SettlementsEndpoint;
+use Mollie\Api\Endpoints\ShipmentEndpoint;
+use Mollie\Api\Endpoints\SubscriptionEndpoint;
 use Mollie\Api\MollieApiClient;
 use Mollie\Laravel\Wrappers\MollieApiWrapper;
 
@@ -101,6 +121,7 @@ class MollieServiceProvider extends ServiceProvider
         $this->registerApiClient();
         $this->registerApiAdapter();
         $this->registerManager();
+        $this->registerEndpoints();
     }
 
     /**
@@ -145,6 +166,46 @@ class MollieServiceProvider extends ServiceProvider
         });
 
         $this->app->alias('mollie', MollieManager::class);
+    }
+
+    /**
+     * Register each Endpoint class
+     */
+    protected function registerEndpoints()
+    {
+        $endpoints = [
+            [ ChargebackEndpoint::class, 'chargebacks' ],
+            [ CustomerEndpoint::class, 'customers' ],
+            [ CustomerPaymentsEndpoint::class, 'customerPayments' ],
+            [ InvoiceEndpoint::class, 'invoices' ],
+            [ MandateEndpoint::class, 'mandates' ],
+            [ MethodEndpoint::class, 'methods' ],
+            [ OrderEndpoint::class, 'orders' ],
+            [ OrderLineEndpoint::class, 'orderLines' ],
+            [ OrderRefundEndpoint::class, 'orderRefunds' ],
+            [ OrganizationEndpoint::class, 'organizations' ],
+            [ PaymentEndpoint::class, 'payments' ],
+            [ PaymentCaptureEndpoint::class, 'paymentCaptures' ],
+            [ PaymentChargebackEndpoint::class, 'paymentChargebacks' ],
+            [ PaymentRefundEndpoint::class, 'paymentRefunds' ],
+            [ PermissionEndpoint::class, 'permissions' ],
+            [ ProfileEndpoint::class, 'profiles' ],
+            [ RefundEndpoint::class, 'refunds' ],
+            [ ShipmentEndpoint::class, 'shipments' ],
+            [ SettlementsEndpoint::class, 'settlements' ],
+            [ SubscriptionEndpoint::class, 'subscriptions' ],
+        ];
+
+        foreach ($endpoints as $endpoint) {
+            $this->registerEndpoint($endpoint[0], $endpoint[1]);
+        }
+    }
+
+    protected function registerEndpoint($abstract, $method)
+    {
+        $this->app->singleton($abstract, function (Container $app) use ($method) {
+            return $app[MollieApiWrapper::class]->$method();
+        });
     }
 
     /**

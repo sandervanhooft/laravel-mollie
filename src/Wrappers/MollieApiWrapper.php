@@ -55,6 +55,7 @@ class MollieApiWrapper
      * @param Repository $config
      * @param MollieApiClient $client
      *
+     * @throws \Mollie\Api\Exceptions\ApiException
      * @return void
      */
     public function __construct(Repository $config, MollieApiClient $client)
@@ -82,8 +83,8 @@ class MollieApiWrapper
     }
 
     /**
-     * @param string $apiKey The Mollie API key, starting with 'test_' or 'live_'
-     * @throws ApiException
+     * @param string $api_key The Mollie API key, starting with 'test_' or 'live_'
+     * @throws \Mollie\Api\Exceptions\ApiException
      */
     public function setApiKey($api_key)
     {
@@ -91,8 +92,8 @@ class MollieApiWrapper
     }
 
     /**
-     * @param string $accessToken OAuth access token, starting with 'access_'
-     * @throws ApiException
+     * @param string $access_token OAuth access token, starting with 'access_'
+     * @throws \Mollie\Api\Exceptions\ApiException
      */
     public function setAccessToken($access_token)
     {
@@ -108,7 +109,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\PaymentEndpoint
+     * @return \Mollie\Api\Endpoints\PaymentEndpoint
      */
     public function payments()
     {
@@ -116,7 +117,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\MethodEndpoint
+     * @return \Mollie\Api\Endpoints\MethodEndpoint
      */
     public function methods()
     {
@@ -124,7 +125,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\CustomerEndpoint
+     * @return \Mollie\Api\Endpoints\CustomerEndpoint
      */
     public function customers()
     {
@@ -132,7 +133,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\SettlementsEndpoint
+     * @return \Mollie\Api\Endpoints\SettlementsEndpoint
      */
     public function settlements()
     {
@@ -140,7 +141,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\SubscriptionEndpoint
+     * @return \Mollie\Api\Endpoints\SubscriptionEndpoint
      */
     public function subscriptions()
     {
@@ -148,7 +149,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\CustomerPaymentsEndpoint
+     * @return \Mollie\Api\Endpoints\CustomerPaymentsEndpoint
      */
     public function customerPayments()
     {
@@ -156,7 +157,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\MandateEndpoint
+     * @return \Mollie\Api\Endpoints\MandateEndpoint
      */
     public function mandates()
     {
@@ -164,7 +165,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\OrganizationEndpoint
+     * @return \Mollie\Api\Endpoints\OrganizationEndpoint
      */
     public function organizations()
     {
@@ -172,7 +173,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\PermissionEndpoint
+     * @return \Mollie\Api\Endpoints\PermissionEndpoint
      */
     public function permissions()
     {
@@ -180,7 +181,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\CustomerPaymentsEndpoint
+     * @return \Mollie\Api\Endpoints\InvoiceEndpoint
      */
     public function invoices()
     {
@@ -188,7 +189,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\ProfileEndpoint
+     * @return \Mollie\Api\Endpoints\ProfileEndpoint
      */
     public function profiles()
     {
@@ -196,7 +197,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\RefundEndpoint
+     * @return \Mollie\Api\Endpoints\RefundEndpoint
      */
     public function refunds()
     {
@@ -204,7 +205,7 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\ChargebackEndpoint
+     * @return \Mollie\Api\Endpoints\ChargebackEndpoint
      */
     public function chargebacks()
     {
@@ -212,10 +213,58 @@ class MollieApiWrapper
     }
 
     /**
-     * @return Mollie\Api\Endpoints\OrderEndpoint
+     * @return \Mollie\Api\Endpoints\OrderEndpoint
      */
     public function orders()
     {
         return $this->client->orders;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\OrderLineEndpoint
+     */
+    public function orderLines()
+    {
+        return $this->client->orderLines;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\OrderRefundEndpoint
+     */
+    public function orderRefunds()
+    {
+        return $this->client->orderRefunds;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\ShipmentEndpoint
+     */
+    public function shipments()
+    {
+        return $this->client->shipments;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\PaymentCaptureEndpoint
+     */
+    public function paymentCaptures()
+    {
+        return $this->client->paymentCaptures;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\PaymentChargebacksEndpoint
+     */
+    public function paymentChargebacks()
+    {
+        return $this->client->paymentChargebacks;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\PaymentRefundEndpoint
+     */
+    public function paymentRefunds()
+    {
+        return $this->client->paymentRefunds;
     }
 }

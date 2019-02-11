@@ -5,6 +5,7 @@ namespace Mollie\Laravel\Tests\Wrappers;
 use Mollie\Api\MollieApiClient;
 use Mollie\Laravel\Tests\TestCase;
 use Mollie\Laravel\Wrappers\MollieApiWrapper;
+use PHPUnit\Framework\ExpectationFailedException;
 
 /**
  * Class MollieApiWrapper
@@ -85,29 +86,35 @@ class MollieApiWrapperTest extends TestCase
 
     public function testWrappedEndpoints()
     {
-        $endpoints = [
-            'chargebacks',
-            'customers',
-            'customerPayments',
-            'invoices',
-            'mandates',
-            'methods',
-            'mandates',
-            'orders',
-            'organizations',
-            'permissions',
-            'payments',
-            'profiles',
-            'refunds',
-            'settlements',
-            'subscriptions',
-        ];
 
         $client = $this->app[MollieApiClient::class];
         $wrapper = new MollieApiWrapper(
             $this->app['config'],
             $client
         );
+        $endpoints = [
+            'chargebacks',
+            'customerPayments',
+            'customers',
+            'invoices',
+            'mandates',
+            'mandates',
+            'methods',
+            'orderLines',
+            'orderRefunds',
+            'orders',
+            'organizations',
+            'paymentCaptures',
+            'paymentChargebacks',
+            'paymentRefunds',
+            'payments',
+            'permissions',
+            'profiles',
+            'refunds',
+            'settlements',
+            'shipments',
+            'subscriptions',
+        ];
 
         foreach ($endpoints as $endpoint) {
             $this->assertWrappedEndpoint($client, $wrapper, $endpoint);
