@@ -36,13 +36,22 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
         $psrRequest = $pendingRequest->createPsrRequest();
 
         try {
-            $response = Http::withHeaders($pendingRequest->headers()->all())
+            // Build base request
+            $http = Http::withHeaders($pendingRequest->headers()->all())
                 ->withUrlParameters($pendingRequest->query()->all())
-                ->withBody($psrRequest->getBody())
-                ->send(
-                    $pendingRequest->method(),
-                    $pendingRequest->url(),
-                );
+                ->withBody($psrRequest->getBody());
+
+            // Optional retries via config: mollie.http.retry.{times,sleep_ms}
+            $times = (int) config('mollie.http.retry.times', 0);
+            if ($times > 0) {
+                $sleepMs = (int) config('mollie.http.retry.sleep_ms', 100);
+                $http = $http->retry($times, $sleepMs);
+            }
+
+            $response = $http->send(
+                $pendingRequest->method(),
+                $pendingRequest->url(),
+            );
 
             $psrResponse = $response->toPsrResponse();
 
@@ -55,3 +64,4 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
         }
     }
 }
+
