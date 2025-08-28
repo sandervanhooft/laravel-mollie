@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mollie\Laravel;
 
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest as LaravelPendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Mollie\Api\Contracts\HttpAdapterContract;
@@ -36,17 +37,8 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
         $psrRequest = $pendingRequest->createPsrRequest();
 
         try {
-            // Build base request
-            $http = Http::withHeaders($pendingRequest->headers()->all())
-                ->withUrlParameters($pendingRequest->query()->all())
-                ->withBody($psrRequest->getBody());
-
-            // Optional retries via config: mollie.http.retry.{times,sleep_ms}
-            $times = (int) config('mollie.http.retry.times', 0);
-            if ($times > 0) {
-                $sleepMs = (int) config('mollie.http.retry.sleep_ms', 100);
-                $http = $http->retry($times, $sleepMs);
-            }
+            // Build the Laravel HTTP client with optional retries
+            $http = $this->makeHttpClient($pendingRequest, $psrRequest->getBody());
 
             $response = $http->send(
                 $pendingRequest->method(),
@@ -62,6 +54,47 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
             // RequestExceptions without response are handled by the retryable network request exception
             return new Response($e->response->toPsrResponse(), $psrRequest, $pendingRequest, $e);
         }
+    }
+
+    /**
+     * Create a configured Laravel HTTP client for the given request, applying headers, query, body and optional retries.
+     */
+    private function makeHttpClient(PendingRequest $pendingRequest, $body): LaravelPendingRequest
+    {
+        $http = Http::withHeaders($pendingRequest->headers()->all())
+            ->withUrlParameters($pendingRequest->query()->all())
+            ->withBody($body);
+
+        [$times, $sleepMs] = $this->getRetryConfig();
+        if (is_array($times) && ! empty($times)) {
+            // Laravel supports passing an array of backoff intervals (ms)
+            $http = $http->retry($times);
+        } elseif (is_int($times) && $times > 0) {
+            $http = $http->retry($times, $sleepMs);
+        }
+
+        return $http;
+    }
+
+    /**
+     * Read retry configuration from config.
+     *
+     * @return array{0:int|array<int,int>,1:int} [times(int or array of ms), sleep_ms]
+     */
+    private function getRetryConfig(): array
+    {
+        $configuredTimes = config('mollie.http.retry.times', 0);
+
+        // Normalize: allow int or array<int,int>
+        if (is_array($configuredTimes)) {
+            $times = array_values(array_map('intval', $configuredTimes));
+        } else {
+            $times = (int) $configuredTimes;
+        }
+
+        $sleepMs = (int) config('mollie.http.retry.sleep_ms', 100);
+
+        return [$times, $sleepMs];
     }
 }
 

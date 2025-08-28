@@ -9,9 +9,12 @@ return [
     // Optional HTTP client retry behaviour for transient network issues
     'http' => [
         'retry' => [
-            // Number of retry attempts (0 disables retries)
+            // Number of retry attempts OR an array of backoff intervals in milliseconds (0 disables retries)
+            // Examples:
+            // - int:    3
+            // - array:  [100, 200, 400]  // sleep per attempt in ms
             'times' => env('MOLLIE_HTTP_RETRY_TIMES', 0),
-            // Sleep in milliseconds between attempts
+            // Sleep in milliseconds between attempts (only used when 'times' is an int)
             'sleep_ms' => env('MOLLIE_HTTP_RETRY_SLEEP_MS', 100),
         ],
     ],
