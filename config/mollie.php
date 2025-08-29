@@ -2,30 +2,61 @@
 
 declare(strict_types=1);
 
+use Mollie\Laravel\MollieLaravelHttpClientAdapter;
+
 return [
 
+    /*
+     * Your Mollie API key.
+     *
+     * Use your test or live API key as provided by Mollie. This will be used
+     * by the default facade `Mollie::api()` unless you override it on the client manually.
+     */
     'key' => env('MOLLIE_KEY', 'test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'),
 
-    // Optional HTTP client retry behaviour for transient network issues
+    /*
+     * HTTP client settings used by the Mollie API client.
+     */
     'http' => [
-        // The HTTP adapter class to use. Must extend \Mollie\Laravel\MollieLaravelHttpClientAdapter.
-        'adapter' => env('MOLLIE_HTTP_ADAPTER', \Mollie\Laravel\MollieLaravelHttpClientAdapter::class),
+        /*
+         * The HTTP adapter class to use.
+         *
+         * Provide a fully qualified class name. The class is expected to be compatible
+         * with Mollie's PHP SDK HTTP adapter expectations; typically you extend
+         * `\Mollie\Laravel\MollieLaravelHttpClientAdapter` to customize behavior.
+         */
+        'adapter' => env('MOLLIE_HTTP_ADAPTER', MollieLaravelHttpClientAdapter::class),
+
+        /*
+         * Optional automatic retry behavior for transient network issues.
+         */
         'retry' => [
-            // Number of retry attempts OR an array of backoff intervals in milliseconds (0 disables retries)
-            // Examples:
-            // - int:    3
-            // - array:  [100, 200, 400]  // sleep per attempt in ms
+            /*
+             * Number of retry attempts OR an array of backoff intervals in milliseconds.
+             * Set to 0 to disable retries.
+             *
+             * Examples:
+             * - integer: 3
+             * - array:   [100, 200, 400]  // sleep per attempt in ms
+             */
             'times' => env('MOLLIE_HTTP_RETRY_TIMES', 0),
-            // Sleep in milliseconds between attempts (only used when 'times' is an int)
+
+            /*
+             * Sleep in milliseconds between attempts when 'times' is an integer.
+             * Ignored when 'times' is an array.
+             */
             'sleep_ms' => env('MOLLIE_HTTP_RETRY_SLEEP_MS', 100),
         ],
     ],
 
-    // If you intend on using Mollie Connect, place the following in the 'config/services.php'
-    // 'mollie' => [
-    //     'client_id'     => env('MOLLIE_CLIENT_ID', 'app_xxx'),
-    //     'client_secret' => env('MOLLIE_CLIENT_SECRET'),
-    //     'redirect'      => env('MOLLIE_REDIRECT_URI'),
-    // ],
+    /*
+     * If you intend on using Mollie Connect, place the following in 'config/services.php':
+     *
+     * 'mollie' => [
+     *     'client_id'     => env('MOLLIE_CLIENT_ID', 'app_xxx'),
+     *     'client_secret' => env('MOLLIE_CLIENT_SECRET'),
+     *     'redirect'      => env('MOLLIE_REDIRECT_URI'),
+     * ],
+     */
 
 ];
