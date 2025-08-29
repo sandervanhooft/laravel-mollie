@@ -8,6 +8,8 @@ return [
 
     // Optional HTTP client retry behaviour for transient network issues
     'http' => [
+        // The HTTP adapter class to use. Must extend \Mollie\Laravel\MollieLaravelHttpClientAdapter.
+        'adapter' => env('MOLLIE_HTTP_ADAPTER', \Mollie\Laravel\MollieLaravelHttpClientAdapter::class),
         'retry' => [
             // Number of retry attempts OR an array of backoff intervals in milliseconds (0 disables retries)
             // Examples:

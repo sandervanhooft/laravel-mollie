@@ -37,8 +37,9 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
         $psrRequest = $pendingRequest->createPsrRequest();
 
         try {
-            // Build the Laravel HTTP client with optional retries
             $http = $this->makeHttpClient($pendingRequest, $psrRequest->getBody());
+
+            $http = $this->applyRetryConfig($http);
 
             $response = $http->send(
                 $pendingRequest->method(),
@@ -59,18 +60,24 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
     /**
      * Create a configured Laravel HTTP client for the given request, applying headers, query, body and optional retries.
      */
-    private function makeHttpClient(PendingRequest $pendingRequest, $body): LaravelPendingRequest
+    protected function makeHttpClient(PendingRequest $pendingRequest, $body): LaravelPendingRequest
     {
-        $http = Http::withHeaders($pendingRequest->headers()->all())
+        return Http::withHeaders($pendingRequest->headers()->all())
             ->withUrlParameters($pendingRequest->query()->all())
             ->withBody($body);
+    }
 
+    protected function applyRetryConfig(LaravelPendingRequest $http): LaravelPendingRequest
+    {
         [$times, $sleepMs] = $this->getRetryConfig();
+
         if (is_array($times) && ! empty($times)) {
             // Laravel supports passing an array of backoff intervals (ms)
-            $http = $http->retry($times);
-        } elseif (is_int($times) && $times > 0) {
-            $http = $http->retry($times, $sleepMs);
+            return $http->retry($times);
+        }
+
+        if (is_int($times) && $times > 0) {
+            return $http->retry($times, $sleepMs);
         }
 
         return $http;
@@ -81,7 +88,7 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
      *
      * @return array{0:int|array<int,int>,1:int} [times(int or array of ms), sleep_ms]
      */
-    private function getRetryConfig(): array
+    protected function getRetryConfig(): array
     {
         $configuredTimes = config('mollie.http.retry.times', 0);
 
@@ -97,4 +104,3 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
         return [$times, $sleepMs];
     }
 }
-
