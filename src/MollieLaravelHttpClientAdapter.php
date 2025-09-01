@@ -14,6 +14,7 @@ use Mollie\Api\Exceptions\RetryableNetworkRequestException;
 use Mollie\Api\Http\PendingRequest;
 use Mollie\Api\Http\Response;
 use Mollie\Api\Traits\HasDefaultFactories;
+use Psr\Http\Message\StreamInterface;
 
 class MollieLaravelHttpClientAdapter implements HttpAdapterContract
 {
@@ -65,7 +66,7 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
     /**
      * Create a configured Laravel HTTP client for the given request, applying headers, query, body and optional retries.
      */
-    protected function makeHttpClient(PendingRequest $pendingRequest, $body): LaravelPendingRequest
+    protected function makeHttpClient(PendingRequest $pendingRequest, string|StreamInterface|null $body): LaravelPendingRequest
     {
         return Http::withHeaders($pendingRequest->headers()->all())
             ->withUrlParameters($pendingRequest->query()->all())
