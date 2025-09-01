@@ -39,14 +39,29 @@ return [
              * - integer: 3
              * - array:   [100, 200, 400]  // sleep per attempt in ms
              */
-            'times' => env('MOLLIE_HTTP_RETRY_TIMES', 0),
+            'times' => env('MOLLIE_HTTP_RETRY_TIMES', MollieLaravelHttpClientAdapter::DEFAULT_RETRY_TIMES),
 
             /*
              * Sleep in milliseconds between attempts when 'times' is an integer.
              * Ignored when 'times' is an array.
              */
-            'sleep_ms' => env('MOLLIE_HTTP_RETRY_SLEEP_MS', 100),
+            'sleep_ms' => env('MOLLIE_HTTP_RETRY_SLEEP_MS', MollieLaravelHttpClientAdapter::DEFAULT_RETRY_SLEEP_MS),
         ],
+
+        /*
+         * The maximum number of seconds to wait for a response.
+         * If exceeded, an Illuminate\Http\Client\ConnectionException will be thrown.
+         *
+         * Laravel default is 30 seconds.
+         */
+        'timeout' => env('MOLLIE_HTTP_TIMEOUT', MollieLaravelHttpClientAdapter::DEFAULT_TIMEOUT),
+
+        /*
+         * The maximum number of seconds to wait while trying to connect to the server.
+         *
+         * Laravel default is 5 seconds.
+         */
+        'connect_timeout' => env('MOLLIE_HTTP_CONNECT_TIMEOUT', MollieLaravelHttpClientAdapter::DEFAULT_CONNECT_TIMEOUT),
     ],
 
     /*

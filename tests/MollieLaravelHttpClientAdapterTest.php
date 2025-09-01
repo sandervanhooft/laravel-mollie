@@ -215,6 +215,8 @@ class FakeHttpClientAdapter extends MollieLaravelHttpClientAdapter
 
     public function __construct()
     {
+        // Fake http client adapter, so we're intentionally not calling the parent constructor
+
         self::$constructed = true;
     }
 }

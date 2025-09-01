@@ -19,6 +19,11 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
 {
     use HasDefaultFactories;
 
+    public const DEFAULT_RETRY_TIMES = 3;
+    public const DEFAULT_RETRY_SLEEP_MS = 200;
+    public const DEFAULT_CONNECT_TIMEOUT = 3.0;
+    public const DEFAULT_TIMEOUT = 30.0;
+
     /**
      * Get the version string for this HTTP adapter.
      */
@@ -64,33 +69,14 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
     {
         return Http::withHeaders($pendingRequest->headers()->all())
             ->withUrlParameters($pendingRequest->query()->all())
+            ->timeout((float) config('mollie.http.timeout', self::DEFAULT_TIMEOUT))
+            ->connectTimeout((float) config('mollie.http.connect_timeout', self::DEFAULT_CONNECT_TIMEOUT))
             ->withBody($body);
     }
 
     protected function applyRetryConfig(LaravelPendingRequest $http): LaravelPendingRequest
     {
-        [$times, $sleepMs] = $this->getRetryConfig();
-
-        if (is_array($times) && ! empty($times)) {
-            // Laravel supports passing an array of backoff intervals (ms)
-            return $http->retry($times);
-        }
-
-        if (is_int($times) && $times > 0) {
-            return $http->retry($times, $sleepMs);
-        }
-
-        return $http;
-    }
-
-    /**
-     * Read retry configuration from config.
-     *
-     * @return array{0:int|array<int,int>,1:int} [times(int or array of ms), sleep_ms]
-     */
-    protected function getRetryConfig(): array
-    {
-        $configuredTimes = config('mollie.http.retry.times', 0);
+        $configuredTimes = config('mollie.http.retry.times', self::DEFAULT_RETRY_TIMES);
 
         // Normalize: allow int or array<int,int>
         if (is_array($configuredTimes)) {
@@ -99,8 +85,15 @@ class MollieLaravelHttpClientAdapter implements HttpAdapterContract
             $times = (int) $configuredTimes;
         }
 
-        $sleepMs = (int) config('mollie.http.retry.sleep_ms', 100);
+        if (is_array($times) && ! empty($times)) {
+            // Laravel supports passing an array of backoff intervals (ms)
+            return $http->retry($times);
+        }
 
-        return [$times, $sleepMs];
+        if (is_int($times) && $times > 0) {
+            return $http->retry($times, (int) config('mollie.http.retry.sleep_ms', self::DEFAULT_RETRY_SLEEP_MS));
+        }
+
+        return $http;
     }
 }
