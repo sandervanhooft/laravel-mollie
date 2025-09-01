@@ -14,6 +14,9 @@ Update `composer.json` to match this:
 
 Then run `composer update mollie/laravel-mollie`.
 
+## Adopt the new config file
+While it's backwards compatible, the `config/mollie.php` file now includes a few new values. You should review the new config file and update your existing `config/mollie.php` file accordingly.
+
 ## Review Changes
 ### Updating Dependencies
 Laravel-Mollie now requires PHP 8.2.0 or greater and supports Laravel 11.0 and 12.0 only. It leverages mollie-api-php version 3, which includes several breaking changes.
@@ -71,6 +74,21 @@ if (! function_exists('mollie')) {
     }
 }
 ```
+
+### New HTTP client configuration
+To leverage the Laravel HTTP client, this package comes with an updated HTTP adapter class, `MollieLaravelHttpClientAdapter`.
+
+If you previously overrode the HTTP adapter, you should update your configuration to use this new class instead.
+
+For easy configuration of the HTTP client, a new `http` key has been added to the `config/mollie.php` file. Here you can override retry behavior (including backoff), configure timeouts, or swap out the complete HTTP adapter class.
+
+Environment variables:
+
+* `MOLLIE_HTTP_RETRY_TIMES` (default: `3`)
+* `MOLLIE_HTTP_RETRY_SLEEP_MS` (default: `200`)
+* `MOLLIE_HTTP_TIMEOUT` (default: `30.0`)
+* `MOLLIE_HTTP_CONNECT_TIMEOUT` (default: `3.0`)
+* `MOLLIE_HTTP_ADAPTER` (optional; FQCN, defaults to `Mollie\Laravel\MollieLaravelHttpClientAdapter`)
 
 ## Stuck?
 Feel free to open an [issue](https://github.com/mollie/laravel-mollie/issues) or come say hi in the [Mollie Community Discord](https://discord.gg/mollie).

@@ -58,7 +58,9 @@ class MollieServiceProvider extends ServiceProvider
         $this->app->singleton(
             MollieApiClient::class,
             function (Container $app) {
-                $client = (new MollieApiClient(new MollieLaravelHttpClientAdapter))
+                $adapter = $this->makeHttpClientAdapter($app);
+
+                $client = (new MollieApiClient($adapter))
                     ->addVersionString('MollieLaravel/' . self::PACKAGE_VERSION);
 
                 if (! empty($apiKey = $app['config']['mollie.key'])) {
@@ -70,5 +72,16 @@ class MollieServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(MollieManager::class);
+    }
+
+    protected function makeHttpClientAdapter(Container $app): MollieLaravelHttpClientAdapter
+    {
+        // Resolve HTTP adapter from config, defaulting to the base adapter
+        $adapterClass = $app['config']['mollie.http.adapter'] ?? MollieLaravelHttpClientAdapter::class;
+
+        /** @var MollieLaravelHttpClientAdapter $adapter */
+        $adapter = $app->make($adapterClass);
+
+        return $adapter;
     }
 }
